@@ -157,7 +157,7 @@ static int g_frames;
 				//TODO: test this leakFont.draw("Leak: " + String.valueOf(leak_tiles.size()), screen, 9, 9, Color.get(5, 333, 333, 333));
 				SpriteSheet sprite = new SpriteSheet(ImageIO.read(Game.class.getResourceAsStream("/icons.png")));
 				leak_tiles.add(sprite);
-				if(debug_safe || leak_tiles.size() >= 1000) {
+				if(debug_safe && leak_tiles.size() >= 1000) {
 					leak_tiles.clear();
 				}
 
@@ -326,8 +326,9 @@ static int g_frames;
 		}
 		if(debug_info) {
 			Font.draw("Leak: " + String.valueOf(leak_tiles.size()), screen, 9, 9, Color.get(5, 333, 333, 333));
-			Font.draw("Sizeof: " + String.valueOf(sizeOfIcon) + "K", screen, 9, 20, Color.get(5, 333, 333, 333));
-			Font.draw("MaxHeap: " + Runtime.getRuntime().maxMemory() / 1000000 + "Mb", screen, 9, 30, Color.get(5, 333, 333, 333));
+			Font.draw("max: " + + Runtime.getRuntime().maxMemory() / 1000000 + "Mb", screen, 9, 30, Color.get(5, 333, 333, 333));
+			Font.draw("current: " + Runtime.getRuntime().totalMemory() / 1000000 + "Mb", screen, 9, 20, Color.get(5, 333, 333, 333));
+			Font.draw("FPS: " + String.valueOf(g_frames), screen, WIDTH - 70, HEIGHT - 30, Color.get(5, 333, 333, 333));
 		}
 		if (player.activeItem != null) {
 			player.activeItem.renderInventory(screen, 10 * 8, screen.h - 16);
