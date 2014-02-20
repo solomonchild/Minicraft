@@ -186,7 +186,7 @@ static int g_frames;
 			if (System.currentTimeMillis() - lastTimer1 > 1000) {
 				lastTimer1 += 1000;
 				//System.out.println(ticks + " ticks, " + frames + " fps");
-				if(!debug_info)
+				if(false && !debug_info)
 					System.out.println("leak: " + leak_tiles.size());
 				g_frames = frames;
 				frames = 0;
@@ -329,6 +329,7 @@ static int g_frames;
 			Font.draw("max: " + + Runtime.getRuntime().maxMemory() / 1000000 + "Mb", screen, 9, 30, Color.get(5, 333, 333, 333));
 			Font.draw("current: " + Runtime.getRuntime().totalMemory() / 1000000 + "Mb", screen, 9, 20, Color.get(5, 333, 333, 333));
 			Font.draw("FPS: " + String.valueOf(g_frames), screen, WIDTH - 70, HEIGHT - 30, Color.get(5, 333, 333, 333));
+			Font.draw("Clear: " + String.valueOf(debug_safe), screen, 9, 40, Color.get(5, 333, 333, 333));
 		}
 		if (player.activeItem != null) {
 			player.activeItem.renderInventory(screen, 10 * 8, screen.h - 16);
