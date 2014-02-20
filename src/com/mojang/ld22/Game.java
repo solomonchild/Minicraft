@@ -8,6 +8,9 @@ import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.io.IOException;
+import java.lang.instrument.Instrumentation;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
@@ -50,10 +53,14 @@ public class Game extends Canvas implements Runnable {
 	private int currentLevel = 3;
 	public Player player;
 
+	public boolean debug_info;
+	public boolean debug_safe;
+	
 	public Menu menu;
 	private int playerDeadTime;
 	private int pendingLevelChange;
 	private int wonTimer = 0;
+	public List leak_tiles = new LinkedList();
 	public boolean hasWon = false;
 
 	public void setMenu(Menu menu) {
@@ -95,7 +102,7 @@ public class Game extends Canvas implements Runnable {
 			levels[i].trySpawn(5000);
 		}
 	}
-
+static int g_frames;
 	private void init() {
 		int pp = 0;
 		for (int r = 0; r < 6; r++) {
@@ -125,6 +132,10 @@ public class Game extends Canvas implements Runnable {
 		setMenu(new TitleMenu());
 	}
 
+	static int sizeOfIcon;
+	
+	
+	
 	public void run() {
 		long lastTime = System.nanoTime();
 		double unprocessed = 0;
@@ -132,13 +143,27 @@ public class Game extends Canvas implements Runnable {
 		int frames = 0;
 		int ticks = 0;
 		long lastTimer1 = System.currentTimeMillis();
-
+		try {
+			sizeOfIcon = Game.class.getResourceAsStream("/icons.png").available() / 1000;
+		} catch (IOException e2) {
+			e2.printStackTrace();
+		}
 		init();
-
 		while (running) {
 			long now = System.nanoTime();
 			unprocessed += (now - lastTime) / nsPerTick;
 			lastTime = now;
+			try {
+				//TODO: test this leakFont.draw("Leak: " + String.valueOf(leak_tiles.size()), screen, 9, 9, Color.get(5, 333, 333, 333));
+				SpriteSheet sprite = new SpriteSheet(ImageIO.read(Game.class.getResourceAsStream("/icons.png")));
+				leak_tiles.add(sprite);
+				if(debug_safe || leak_tiles.size() >= 1000) {
+					leak_tiles.clear();
+				}
+
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 			boolean shouldRender = true;
 			while (unprocessed >= 1) {
 				ticks++;
@@ -160,7 +185,10 @@ public class Game extends Canvas implements Runnable {
 
 			if (System.currentTimeMillis() - lastTimer1 > 1000) {
 				lastTimer1 += 1000;
-				System.out.println(ticks + " ticks, " + frames + " fps");
+				//System.out.println(ticks + " ticks, " + frames + " fps");
+				if(!debug_info)
+					System.out.println("leak: " + leak_tiles.size());
+				g_frames = frames;
 				frames = 0;
 				ticks = 0;
 			}
@@ -172,6 +200,13 @@ public class Game extends Canvas implements Runnable {
 		if (!hasFocus()) {
 			input.releaseAll();
 		} else {
+			if(input.debug_info.clicked) {
+				debug_info = debug_info ^ true;
+			}
+			if(input.debug_safe.clicked) {
+				debug_safe = debug_safe ^ true;
+			}
+			
 			if (!player.removed && !hasWon) gameTime++;
 
 			input.tick();
@@ -288,6 +323,11 @@ public class Game extends Canvas implements Runnable {
 				else
 					screen.render(i * 8, screen.h - 8, 1 + 12 * 32, Color.get(000, 110, 000, 000), 0);
 			}
+		}
+		if(debug_info) {
+			Font.draw("Leak: " + String.valueOf(leak_tiles.size()), screen, 9, 9, Color.get(5, 333, 333, 333));
+			Font.draw("Sizeof: " + String.valueOf(sizeOfIcon) + "K", screen, 9, 20, Color.get(5, 333, 333, 333));
+			Font.draw("MaxHeap: " + Runtime.getRuntime().maxMemory() / 1000000 + "Mb", screen, 9, 30, Color.get(5, 333, 333, 333));
 		}
 		if (player.activeItem != null) {
 			player.activeItem.renderInventory(screen, 10 * 8, screen.h - 16);

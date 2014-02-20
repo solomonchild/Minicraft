@@ -41,6 +41,8 @@ public class InputHandler implements KeyListener {
 	public Key right = new Key();
 	public Key attack = new Key();
 	public Key menu = new Key();
+	public Key debug_info = new Key();
+	public Key debug_safe = new Key();
 
 	public void releaseAll() {
 		for (int i = 0; i < keys.size(); i++) {
@@ -88,6 +90,8 @@ public class InputHandler implements KeyListener {
 		if (ke.getKeyCode() == KeyEvent.VK_NUMPAD0) attack.toggle(pressed);
 		if (ke.getKeyCode() == KeyEvent.VK_INSERT) attack.toggle(pressed);
 		if (ke.getKeyCode() == KeyEvent.VK_ENTER) menu.toggle(pressed);
+		if (ke.getKeyCode() == KeyEvent.VK_U) debug_info.toggle(pressed);
+		if (ke.getKeyCode() == KeyEvent.VK_I) debug_safe.toggle(pressed);
 
 		if (ke.getKeyCode() == KeyEvent.VK_X) menu.toggle(pressed);
 		if (ke.getKeyCode() == KeyEvent.VK_C) attack.toggle(pressed);
